@@ -42,7 +42,7 @@ package Fair_Share_Scheduler is
    type User_Array is array (1 .. Max_Users) of User_Record;
 
    -- The Scheduler engine configured with a specific algorithmic variant
-   type Scheduler (Algorithm : Algorithm_Type) is tagged record
+   type Scheduler (Algorithm : Algorithm_Type) is tagged limited record
       Processes       : Process_Array;
       Users           : User_Array;
       Current_Process : Process_ID := Null_Process;
