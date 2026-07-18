@@ -122,10 +122,11 @@ procedure Tests is
          end if;
       end loop;
       
-      -- Run some ticks
+      -- Run some ticks - select and tick the process
       declare
          Selected : Process_ID := Select_Next_Process(Sched);
       begin
+         pragma Assert(Selected /= Null_Process);
          Tick(Sched, 1.0);
       end;
       
@@ -149,6 +150,7 @@ procedure Tests is
          declare
             Selected : Process_ID := Select_Next_Process(Sched);
          begin
+            pragma Assert(Selected /= Null_Process);
             Tick(Sched, 1.0);
          end;
       end loop;
@@ -193,6 +195,7 @@ procedure Tests is
       declare
          Selected : Process_ID := Select_Next_Process(Sched);
       begin
+         pragma Assert(Selected /= Null_Process);
          Tick(Sched, 1.0);
       end;
       
@@ -215,6 +218,7 @@ procedure Tests is
       declare
          Selected : Process_ID := Select_Next_Process(Sched);
       begin
+         pragma Assert(Selected /= Null_Process);
          Tick(Sched, 5.0);
       end;
       
