@@ -4,7 +4,7 @@ all: clean build run
 
 build: fair_share_demo
 
-fair_share_demo: main.adb fair_scheduler.adb fair_scheduler.ads
+fair_share_demo: main.adb fair_share_scheduler.adb fair_share_scheduler.ads
 	mkdir -p obj
 	gprbuild -P fair_share.gpr
 
