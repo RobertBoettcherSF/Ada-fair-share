@@ -124,7 +124,7 @@ procedure Tests is
       
       -- Run some ticks - select and tick the process
       declare
-         Selected : Process_ID := Select_Next_Process(Sched);
+         Selected : constant Process_ID := Select_Next_Process(Sched);
       begin
          pragma Assert(Selected /= Null_Process);
          Tick(Sched, 1.0);
@@ -148,7 +148,7 @@ procedure Tests is
       -- Build up some CPU usage
       for I in 1..5 loop
          declare
-            Selected : Process_ID := Select_Next_Process(Sched);
+            Selected : constant Process_ID := Select_Next_Process(Sched);
          begin
             pragma Assert(Selected /= Null_Process);
             Tick(Sched, 1.0);
@@ -193,7 +193,7 @@ procedure Tests is
       
       -- Run some ticks
       declare
-         Selected : Process_ID := Select_Next_Process(Sched);
+         Selected : constant Process_ID := Select_Next_Process(Sched);
       begin
          pragma Assert(Selected /= Null_Process);
          Tick(Sched, 1.0);
@@ -216,7 +216,7 @@ procedure Tests is
       
       -- Run first process to give it some virtual runtime
       declare
-         Selected : Process_ID := Select_Next_Process(Sched);
+         Selected : constant Process_ID := Select_Next_Process(Sched);
       begin
          pragma Assert(Selected /= Null_Process);
          Tick(Sched, 5.0);
