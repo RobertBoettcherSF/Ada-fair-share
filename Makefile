@@ -1,17 +1,24 @@
-# Simple Makefile for Fair-Share Scheduler
+# Makefile for Fair-Share Scheduler
 
 all: clean build run
 
-build: main
+build: main_demo tests
 
-main: main.adb fair_share_scheduler.adb fair_share_scheduler.ads
+main_demo: main.adb fair_share_scheduler.adb fair_share_scheduler.ads
 	mkdir -p obj
 	gprbuild -P fair_share.gpr
 
-run: main
+tests: tests.adb fair_share_scheduler.adb fair_share_scheduler.ads
+	mkdir -p obj
+	gprbuild -P tests.gpr
+
+run: main_demo
 	./main
 
-clean:
-	rm -rf obj *.o *.ali *.exe main
+test: tests
+	./tests
 
-.PHONY: all build run clean
+clean:
+	rm -rf obj *.o *.ali *.exe main tests
+
+.PHONY: all build run test clean
