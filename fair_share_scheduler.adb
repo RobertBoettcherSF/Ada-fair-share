@@ -89,24 +89,24 @@ package body Fair_Share_Scheduler is
          when Traditional_Unix_FSS =>
             declare
                Min_Priority : Float := Float'Last;
-               U_Idx        : Integer;
-               U_CPU        : Float;
             begin
                -- Lower number implies higher priority. Priority = Base + CPU_Use/2 + User_CPU_Use/2
                for I in Self.Processes'Range loop
                   if Self.Processes(I).Is_Active then
-                     U_Idx := Get_User_Index (Self, Self.Processes(I).Owner);
-                     U_CPU := (if U_Idx > 0 then Self.Users(U_Idx).CPU_Usage else 0.0);
-                     
-                     Self.Processes(I).Dynamic_Priority := 
-                       Self.Processes(I).Base_Priority + 
-                       (Self.Processes(I).CPU_Usage / 2.0) + 
-                       (U_CPU / 2.0);
+                     declare
+                        U_Idx : constant Integer := Get_User_Index (Self, Self.Processes(I).Owner);
+                        U_CPU : constant Float := (if U_Idx > 0 then Self.Users(U_Idx).CPU_Usage else 0.0);
+                     begin
+                        Self.Processes(I).Dynamic_Priority := 
+                          Self.Processes(I).Base_Priority + 
+                          (Self.Processes(I).CPU_Usage / 2.0) + 
+                          (U_CPU / 2.0);
 
-                     if Self.Processes(I).Dynamic_Priority < Min_Priority then
-                        Min_Priority := Self.Processes(I).Dynamic_Priority;
-                        Selected_ID  := Self.Processes(I).ID;
-                     end if;
+                        if Self.Processes(I).Dynamic_Priority < Min_Priority then
+                           Min_Priority := Self.Processes(I).Dynamic_Priority;
+                           Selected_ID  := Self.Processes(I).ID;
+                        end if;
+                     end;
                   end if;
                end loop;
             end;
@@ -128,13 +128,11 @@ package body Fair_Share_Scheduler is
 
          when Lottery_Scheduling =>
             declare
-               Total_User_Shares    : Float := 0.0;
-               Total_System_Tickets : Float := 10000.0;
+               Total_User_Shares : Float := 0.0;
+               Total_System_Tickets : constant Float := 10000.0;
                Current_Ticket_Count : Float := 0.0;
-               Random_Val           : Float;
-               U_Idx                : Integer;
-               Active_Procs         : Float;
-               Proc_Tickets         : Float;
+               Random_Val : Float;
+               Proc_Tickets : Float;
             begin
                for I in Self.Users'Range loop
                   if Self.Users(I).Is_Active then
@@ -147,20 +145,23 @@ package body Fair_Share_Scheduler is
                   
                   for I in Self.Processes'Range loop
                      if Self.Processes(I).Is_Active then
-                        U_Idx := Get_User_Index (Self, Self.Processes(I).Owner);
-                        Active_Procs := Count_User_Processes (Self, Self.Processes(I).Owner);
-                        Proc_Tickets := 0.0;
-                        
-                        -- Process tickets = (User Share % of Total) divided equally among the user's active processes
-                        if U_Idx > 0 and then Active_Procs > 0.0 then
-                           Proc_Tickets := (Self.Users(U_Idx).Shares / Total_User_Shares) * Total_System_Tickets / Active_Procs;
-                        end if;
+                        declare
+                           U_Idx : constant Integer := Get_User_Index (Self, Self.Processes(I).Owner);
+                           Active_Procs : constant Float := Count_User_Processes (Self, Self.Processes(I).Owner);
+                        begin
+                           Proc_Tickets := 0.0;
+                           
+                           -- Process tickets = (User Share % of Total) divided equally among the user's active processes
+                           if U_Idx > 0 and then Active_Procs > 0.0 then
+                              Proc_Tickets := (Self.Users(U_Idx).Shares / Total_User_Shares) * Total_System_Tickets / Active_Procs;
+                           end if;
 
-                        Current_Ticket_Count := Current_Ticket_Count + Proc_Tickets;
-                        if Random_Val <= Current_Ticket_Count then
-                           Selected_ID := Self.Processes(I).ID;
-                           exit;
-                        end if;
+                           Current_Ticket_Count := Current_Ticket_Count + Proc_Tickets;
+                           if Random_Val <= Current_Ticket_Count then
+                              Selected_ID := Self.Processes(I).ID;
+                              exit;
+                           end if;
+                        end;
                      end if;
                   end loop;
                end if;
@@ -200,7 +201,7 @@ package body Fair_Share_Scheduler is
       end if;
 
       declare
-         U_Idx : Integer := Get_User_Index (Self, Self.Processes(P_Idx).Owner);
+         U_Idx : constant Integer := Get_User_Index (Self, Self.Processes(P_Idx).Owner);
       begin
          case Self.Algorithm is
             
@@ -212,8 +213,8 @@ package body Fair_Share_Scheduler is
 
             when Completely_Fair_Scheduler_CFS =>
                declare
-                  Active_Procs : Float := Count_User_Processes (Self, Self.Processes(P_Idx).Owner);
-                  Weight       : Float := 1.0;
+                  Active_Procs : constant Float := Count_User_Processes (Self, Self.Processes(P_Idx).Owner);
+                  Weight : Float := 1.0;
                begin
                   -- Virtual runtime penalty is mitigated by the User's share weight.
                   -- Heavier weight = slower virtual runtime increase = gets scheduled more.
