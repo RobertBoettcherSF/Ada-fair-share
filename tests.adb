@@ -1,5 +1,4 @@
 with Ada.Text_IO;
-with Ada.Float_Text_IO;
 with Fair_Share_Scheduler;
 
 procedure Tests is
@@ -108,6 +107,7 @@ procedure Tests is
       Sched : Scheduler(Traditional_Unix_FSS);
       Initial_Usage : Float;
       P_Idx : Integer;
+      Selected : Process_ID;
    begin
       Ada.Text_IO.Put_Line("Test 7: Traditional FSS - CPU usage increases");
       Initialize(Sched);
@@ -124,7 +124,7 @@ procedure Tests is
       end loop;
       
       -- Run some ticks
-      Select_Next_Process(Sched);
+      Selected := Select_Next_Process(Sched);
       Tick(Sched, 1.0);
       
       Assert(Sched.Processes(P_Idx).CPU_Usage > Initial_Usage, 
@@ -136,6 +136,7 @@ procedure Tests is
       Sched : Scheduler(Traditional_Unix_FSS);
       Initial_Usage : Float;
       P_Idx : Integer;
+      Selected : Process_ID;
    begin
       Ada.Text_IO.Put_Line("Test 8: Traditional FSS - Decay reduces CPU usage");
       Initialize(Sched);
@@ -144,7 +145,7 @@ procedure Tests is
       
       -- Build up some CPU usage
       for I in 1..5 loop
-         Select_Next_Process(Sched);
+         Selected := Select_Next_Process(Sched);
          Tick(Sched, 1.0);
       end loop;
       
@@ -169,6 +170,7 @@ procedure Tests is
       Sched : Scheduler(Completely_Fair_Scheduler_CFS);
       Initial_VRuntime : Float;
       P_Idx : Integer;
+      Selected : Process_ID;
    begin
       Ada.Text_IO.Put_Line("Test 9: CFS - Virtual runtime increases");
       Initialize(Sched);
@@ -185,7 +187,7 @@ procedure Tests is
       end loop;
       
       -- Run some ticks
-      Select_Next_Process(Sched);
+      Selected := Select_Next_Process(Sched);
       Tick(Sched, 1.0);
       
       Assert(Sched.Processes(P_Idx).Virtual_Runtime > Initial_VRuntime, 
@@ -196,6 +198,7 @@ procedure Tests is
    procedure Test_CFS_Selects_Lowest_VRuntime is
       Sched : Scheduler(Completely_Fair_Scheduler_CFS);
       Next_Proc : Process_ID;
+      Selected : Process_ID;
    begin
       Ada.Text_IO.Put_Line("Test 10: CFS selects process with lowest virtual runtime");
       Initialize(Sched);
@@ -204,7 +207,7 @@ procedure Tests is
       Add_Process(Sched, Process_ID(2), User_ID(1));
       
       -- Run first process to give it some virtual runtime
-      Select_Next_Process(Sched);
+      Selected := Select_Next_Process(Sched);
       Tick(Sched, 5.0);
       
       -- Now the second process should have lower virtual runtime
@@ -218,7 +221,6 @@ procedure Tests is
       Sched : Scheduler(Lottery_Scheduling);
       Next_Proc : Process_ID;
       Selected : array(1..3) of Boolean := (others => False);
-      Count : Integer := 0;
    begin
       Ada.Text_IO.Put_Line("Test 11: Lottery - all processes get selected");
       Initialize(Sched);
@@ -245,6 +247,7 @@ procedure Tests is
       Sched : Scheduler(Lottery_Scheduling);
       Next_Proc : Process_ID;
       Count1, Count2 : Integer := 0;
+      Selected : Process_ID;
    begin
       Ada.Text_IO.Put_Line("Test 12: Lottery - higher share gets selected more");
       Initialize(Sched);
@@ -255,9 +258,9 @@ procedure Tests is
       
       -- Run many selections
       for I in 1..1000 loop
-         Next_Proc := Select_Next_Process(Sched);
-         if Next_Proc = Process_ID(1) then Count1 := Count1 + 1; end if;
-         if Next_Proc = Process_ID(2) then Count2 := Count2 + 1; end if;
+         Selected := Select_Next_Process(Sched);
+         if Selected = Process_ID(1) then Count1 := Count1 + 1; end if;
+         if Selected = Process_ID(2) then Count2 := Count2 + 1; end if;
          Tick(Sched, 0.1);
       end loop;
       
@@ -277,6 +280,7 @@ procedure Tests is
       Sched : Scheduler(Completely_Fair_Scheduler_CFS);
       Next_Proc : Process_ID;
       Count1, Count2 : Integer := 0;
+      Selected : Process_ID;
    begin
       Ada.Text_IO.Put_Line("Test 13: CFS with multiple users - fair distribution");
       Initialize(Sched);
@@ -287,9 +291,9 @@ procedure Tests is
       
       -- Run many selections
       for I in 1..100 loop
-         Next_Proc := Select_Next_Process(Sched);
-         if Next_Proc = Process_ID(1) then Count1 := Count1 + 1; end if;
-         if Next_Proc = Process_ID(2) then Count2 := Count2 + 1; end if;
+         Selected := Select_Next_Process(Sched);
+         if Selected = Process_ID(1) then Count1 := Count1 + 1; end if;
+         if Selected = Process_ID(2) then Count2 := Count2 + 1; end if;
          Tick(Sched, 1.0);
       end loop;
       
